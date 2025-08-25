@@ -230,15 +230,8 @@
             var pc_good = this.Check("PC", final.PC, cpu.PC);
             var sp_good = this.Check("SP", final.SP, cpu.SP);
 
-            //byte xyMask = 0;
-            //unchecked
-            //{
-            //    xyMask = (byte)~(StatusBits.XF | StatusBits.YF);
-            //}
-            //var f_good = this.Check("F", (byte)(final.F & xyMask), (byte)(cpu.F & xyMask));
-            var f_good = this.Check("F", final.F, cpu.F);
-
             var a_good = this.Check("A", final.A, cpu.A);
+            var f_good = this.Check("F", final.F, cpu.F);
             var b_good = this.Check("B", final.B, cpu.B);
             var c_good = this.Check("C", final.C, cpu.C);
             var d_good = this.Check("D", final.D, cpu.D);
@@ -364,17 +357,10 @@
             cpu.Exx();
             cpu.ExxAF();
 
-            cpu.A = state.A;
-            cpu.F = state.F;
-
-            cpu.B = state.B;
-            cpu.C = state.C;
-            
-            cpu.D = state.D;
-            cpu.E = state.E;
-            
-            cpu.H = state.H;
-            cpu.L = state.L;
+            cpu.AF.Assign(state.F, state.A);
+            cpu.BC.Assign(state.C, state.B);
+            cpu.DE.Assign(state.E, state.D);
+            cpu.HL.Assign(state.L, state.H);
 
             cpu.IV = state.I;
             cpu.REFRESH = state.R;

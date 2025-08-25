@@ -29,7 +29,6 @@
             base.LowerPOWER();
         }
 
-
         public override void RaisePOWER()
         {
             base.RaisePOWER();

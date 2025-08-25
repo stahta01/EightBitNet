@@ -8,8 +8,7 @@ namespace Z80.HarteTest
     {
         public static async Task Main(string[] _)
         {
-            var directory = @"C:\github\spectrum\libraries\EightBit\modules\z80\v1";
-
+            var directory = @"C:\github\spectrum\libraries\EightBit\modules\z80\v2";
             await ProcessTestSuiteAsync(directory).ConfigureAwait(false);
         }
 
