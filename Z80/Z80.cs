@@ -192,6 +192,7 @@ namespace Z80
             this.ExxAF();
             this.ResetRegisterSet();
         }
+
         private void Z80_LoweredINT(object? sender, EventArgs e)
         {
             this._interruptPending = true;
@@ -480,14 +481,8 @@ namespace Z80
         {
             Debug.Assert(ticks > 0, "Ticks must be greater than zero");
             this.OnWritingMemory();
-#if CYCLE_ACCURATE
-            this.Tick(ticks - 1);
-            this.LowerMREQ();
-            this.Tick();
-#else
             this.Tick(ticks);
             this.LowerMREQ();
-#endif
             this.LowerWR();
             this.Tick();
             base.MemoryWrite();
@@ -507,13 +502,8 @@ namespace Z80
             Debug.Assert(this.M1.Lowered(), "M1 must be lowered to refresh memory");
             this.Bus.Address.Assign(this.REFRESH, this.IV);
             this.LowerRFSH();
-#if CYCLE_ACCURATE
-            this.LowerMREQ();
-            this.Tick();
-#else
             this.Tick();
             this.LowerMREQ();
-#endif
             this.RaiseMREQ();
             this.RaiseRFSH();
         }
@@ -543,16 +533,10 @@ namespace Z80
         private void MemoryReadWithoutM1()
         {
             Debug.Assert(this.M1.Raised());
-#if CYCLE_ACCURATE
-            this.SetMemoryRead();
-            _ = base.MemoryRead();
-            this.Tick(2);
-#else
             this.Tick();
             this.SetMemoryRead();
             this.Tick();
             _ = base.MemoryRead();
-#endif
             this.ResetMemoryRead();
         }
 
@@ -1515,22 +1499,7 @@ namespace Z80
                                     if (this._displaced)
                                     {
                                         this.FetchDisplacement();
-                                        {
-                                            this.ImmediateAddress();
-#if CYCLE_ACCURATE
-                                            this.OnReadingMemory();
-                                            this.Tick();
-                                            this.SetMemoryRead();
-                                            var instruction = base.MemoryRead();
-                                            this.Tick();
-                                            this.ResetMemoryRead();
-                                            this.Tick();
-                                            this.OnReadMemory();
-#else
-                                            var instruction = this.MemoryRead();
-#endif
-                                            this.Execute(instruction);
-                                        }
+                                        this.Execute(this.FetchByte());
                                     }
                                     else
                                     {
@@ -2419,13 +2388,8 @@ namespace Z80
         {
             this.MEMPTR.Assign(this.Bus.Address);
             this.Tick();
-#if CYCLE_ACCURATE
-            this.SetIOWrite();
-            this.Tick();
-#else
             this.Tick();
             this.SetIOWrite();
-#endif
             this.Tick();
             this.Ports.Write(this.Bus.Address, this.Bus.Data);
             this.ResetIOWrite();
@@ -2461,16 +2425,9 @@ namespace Z80
         private void ReadPort()
         {
             this.MEMPTR.Assign(this.Bus.Address);
-            this.Tick();
-#if CYCLE_ACCURATE
+            this.Tick(2);
             this.SetIORead();
             this.Bus.Data = this.Ports.Read(this.Bus.Address);
-            this.Tick();
-#else
-            this.Tick();
-            this.SetIORead();
-            this.Bus.Data = this.Ports.Read(this.Bus.Address);
-#endif
             this.Tick();
             this.ResetIORead();
             this.Tick();
